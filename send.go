@@ -3,7 +3,9 @@ package gosocketio
 import (
 	"encoding/json"
 	"errors"
+	"strings"
 	"time"
+
 	"github.com/graarh/golang-socketio/protocol"
 )
 
@@ -23,6 +25,13 @@ func send(msg *protocol.Message, c *Channel, args interface{}) error {
 		}
 
 		msg.Args = string(json)
+
+		// hack to unwrap an array, super silly
+		// before: ["game_update", ["arg1", "arg2"]]
+		// after:  ["game_update", "arg1", "arg2"]
+		if strings.HasPrefix(msg.Args, "[") && strings.HasSuffix(msg.Args, "]") {
+			msg.Args = msg.Args[1 : len(msg.Args)-1]
+		}
 	}
 
 	command, err := protocol.Encode(msg)
@@ -44,8 +53,8 @@ Create packet based on given data and send it
 */
 func (c *Channel) Emit(method string, args interface{}) error {
 	msg := &protocol.Message{
-		Type: protocol.MessageTypeEmit,
-		Method:  method,
+		Type:   protocol.MessageTypeEmit,
+		Method: method,
 	}
 
 	return send(msg, c, args)
@@ -56,9 +65,9 @@ Create ack packet based on given data and send it and receive response
 */
 func (c *Channel) Ack(method string, args interface{}, timeout time.Duration) (string, error) {
 	msg := &protocol.Message{
-		Type: protocol.MessageTypeAckRequest,
-		AckId:   c.ack.getNextId(),
-		Method:  method,
+		Type:   protocol.MessageTypeAckRequest,
+		AckId:  c.ack.getNextId(),
+		Method: method,
 	}
 
 	waiter := make(chan string)

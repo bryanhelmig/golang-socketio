@@ -3,11 +3,13 @@ package gosocketio
 import (
 	"encoding/json"
 	"errors"
-	"github.com/graarh/golang-socketio/protocol"
-	"github.com/graarh/golang-socketio/transport"
+	"log"
 	"net/http"
 	"sync"
 	"time"
+
+	"github.com/graarh/golang-socketio/protocol"
+	"github.com/graarh/golang-socketio/transport"
 )
 
 const (
@@ -119,6 +121,7 @@ func inLoop(c *Channel, m *methods) error {
 			CloseChannel(c, m, protocol.ErrorWrongPacket)
 			return err
 		}
+		log.Println("<<< ", msg)
 
 		switch msg.Type {
 		case protocol.MessageTypeOpen:
@@ -169,6 +172,7 @@ func outLoop(c *Channel, m *methods) error {
 			return nil
 		}
 
+		log.Println(">>> ", msg)
 		err := c.conn.WriteMessage(msg)
 		if err != nil {
 			return CloseChannel(c, m, err)
