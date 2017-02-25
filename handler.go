@@ -5,6 +5,8 @@ import (
 	"reflect"
 	"sync"
 
+	"strings"
+
 	"github.com/bryanhelmig/golang-socketio/protocol"
 )
 
@@ -100,7 +102,14 @@ func (m *methods) processIncomingMessage(c *Channel, msg *protocol.Message) {
 		}
 
 		data := f.getArgs()
-		err := json.Unmarshal([]byte(msg.Args), &data)
+
+		// for some reason ",null" is trash data?
+		// related to my [] logic?
+		args := msg.Args
+		if strings.HasSuffix(msg.Args, ",null") {
+			args = args[0 : len(args)-5]
+		}
+		err := json.Unmarshal([]byte(args), &data)
 		if err != nil {
 			return
 		}
