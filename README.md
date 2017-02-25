@@ -1,6 +1,8 @@
 golang socket.io
 ================
 
+> Dumb fork of main library to add deep logging and argument flattening.
+
 golang implementation of [socket.io](http://socket.io) library, client and server
 
 You can check working chat server, based on this library, at http://funstream.tv
